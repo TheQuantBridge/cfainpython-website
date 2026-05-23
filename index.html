@@ -295,11 +295,12 @@ footer { padding: 2.5rem 4rem; border-top: 1px solid var(--border); display: fle
   <div class="section-tag">Stay Updated</div>
   <h2 class="section-title fade-in">New notebook every week.</h2>
   <p class="section-sub fade-in" style="margin:0 auto 2rem;text-align:center;">Get notified when new notebooks drop. No spam. Just rigorous finance content in Python.</p>
-  <form class="newsletter-form fade-in" onsubmit="handleSubmit(event)">
-    <input type="email" class="newsletter-input" placeholder="your@email.com" required>
+  <form class="newsletter-form fade-in" id="beehiiv-form">
+    <input type="email" class="newsletter-input" id="beehiiv-email" placeholder="your@email.com" required>
     <button type="submit" class="btn-primary">Subscribe →</button>
   </form>
   <p id="success-msg" style="display:none;font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-top:1rem;">✓ You're in. First notebook incoming.</p>
+  <p id="error-msg" style="display:none;font-family:var(--font-mono);font-size:13px;color:#F85149;margin-top:1rem;">Something went wrong. Try again.</p>
 </section>
 <section class="coming-soon-section">
   <div class="section-tag" style="justify-content:center;">Roadmap</div>
@@ -347,11 +348,31 @@ const observer = new IntersectionObserver(entries => {
   entries.forEach((entry, i) => { if (entry.isIntersecting) setTimeout(() => entry.target.classList.add('visible'), i * 80); });
 }, { threshold: 0.1 });
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-function handleSubmit(e) {
+document.getElementById('beehiiv-form').addEventListener('submit', async function(e) {
   e.preventDefault();
-  document.getElementById('success-msg').style.display = 'block';
-  e.target.reset();
-}
+  const email = document.getElementById('beehiiv-email').value;
+  const btn = this.querySelector('button');
+  btn.textContent = 'Subscribing...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('https://api.beehiiv.com/v2/publications/pub_c31631e4-d2b5-43a7-8961-abca4f2719f2/subscriptions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, reactivate_existing: true, send_welcome_email: true })
+    });
+    if (res.ok) {
+      document.getElementById('success-msg').style.display = 'block';
+      document.getElementById('error-msg').style.display = 'none';
+      document.getElementById('beehiiv-email').value = '';
+    } else { throw new Error('Failed'); }
+  } catch {
+    document.getElementById('error-msg').style.display = 'block';
+    document.getElementById('success-msg').style.display = 'none';
+  } finally {
+    btn.textContent = 'Subscribe →';
+    btn.disabled = false;
+  }
+})
 </script>
 </body>
 </html>
