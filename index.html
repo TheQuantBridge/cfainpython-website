@@ -355,10 +355,10 @@ document.getElementById('beehiiv-form').addEventListener('submit', async functio
   btn.textContent = 'Subscribing...';
   btn.disabled = true;
   try {
-    const res = await fetch('https://api.beehiiv.com/v2/publications/pub_c31631e4-d2b5-43a7-8961-abca4f2719f2/subscriptions', {
+    const res = await fetch('/api/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, reactivate_existing: true, send_welcome_email: true })
+      body: JSON.stringify({ email: email })
     });
     if (res.ok) {
       document.getElementById('success-msg').style.display = 'block';
